@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 function Food({ food, onRemove, onToggle }) {
+  useEffect(() => {
+    console.log("신메뉴 판매");
+    console.log(food);
+
+    return () => {
+      console.log("메뉴 상태 변경");
+      console.log(food);
+    };
+  }, [food]);
+
   return (
     <div>
       <b

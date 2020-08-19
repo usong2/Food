@@ -1,20 +1,28 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo, useCallback } from "react";
 import FoodList from "./FoodList";
 import AddFood from "./AddFood";
 
+function countOrderFoods(foods) {
+  console.log("주문 완료된 음식을 세는 중...");
+  return foods.filter((food) => food.order).length;
+}
+
 function Foods() {
   const [inputs, setInputs] = useState({
-    food: "",
+    foodname: "",
     kcal: "",
   });
   const { foodname, kcal } = inputs;
-  const onChange = (e) => {
-    const { name, value } = e.target;
-    setInputs({
-      ...inputs,
-      [name]: value,
-    });
-  };
+  const onChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      setInputs({
+        ...inputs,
+        [name]: value,
+      });
+    },
+    [inputs]
+  );
 
   const [foods, setFoods] = useState([
     {
@@ -38,7 +46,7 @@ function Foods() {
   ]);
 
   const nextId = useRef(4);
-  const onCreate = () => {
+  const onCreate = useCallback(() => {
     const food = {
       id: nextId.current,
       foodname,
@@ -47,24 +55,31 @@ function Foods() {
     setFoods(foods.concat(food));
 
     setInputs({
-      food: "",
+      foodname: "",
       kcal: "",
     });
     nextId.current += 1;
-  };
+  }, [foods, foodname, kcal]);
 
-  const onRemove = (id) => {
-    setFoods(foods.filter((food) => food.id !== id));
-  };
+  const onRemove = useCallback(
+    (id) => {
+      setFoods(foods.filter((food) => food.id !== id));
+    },
+    [foods]
+  );
 
-  const onToggle = (id) => {
-    setFoods(
-      foods.map((food) =>
-        food.id === id ? { ...food, order: !food.order } : food
-      )
-    );
-  };
+  const onToggle = useCallback(
+    (id) => {
+      setFoods(
+        foods.map((food) =>
+          food.id === id ? { ...food, order: !food.order } : food
+        )
+      );
+    },
+    [foods]
+  );
 
+  const count = useMemo(() => countOrderFoods(foods), [foods]);
   return (
     <>
       <AddFood
@@ -74,6 +89,7 @@ function Foods() {
         onCreate={onCreate}
       />
       <FoodList foods={foods} onRemove={onRemove} onToggle={onToggle} />
+      <div>주문완료 음식 : {count}</div>
     </>
   );
 }
